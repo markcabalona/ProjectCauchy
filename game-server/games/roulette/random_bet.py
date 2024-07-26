@@ -9,6 +9,7 @@ from games.roulette.bet import (
     LineBet,
     OddOrEvenBet,
     RouletteBet,
+    RouletteBetType,
     SplitBet,
     StraightUpBet,
     StreetBet,
@@ -18,7 +19,43 @@ from games.roulette.roulette_game import PocketColor, RouletteGame
 _roulette = RouletteGame()
 
 
-def random_straight_up_bet() -> RouletteBet:
+def random_bet() -> RouletteBet:
+    bet_type: RouletteBetType = Random().choice(list(RouletteBetType))
+    if bet_type is RouletteBetType.STRAIGHT_UP:
+        return _random_straight_up_bet()
+
+    if bet_type is RouletteBetType.SPLIT:
+        return _random_split_bet()
+
+    if bet_type is RouletteBetType.STREET:
+        return _random_street_bet()
+
+    if bet_type is RouletteBetType.FIVE_NUMBER_BET:
+        return _five_number_bet()
+
+    if bet_type is RouletteBetType.LINE:
+        return _random_line_bet()
+
+    if bet_type is RouletteBetType.DOZEN:
+        return _random_dozen_bet()
+
+    if bet_type is RouletteBetType.COLUMN:
+        return _random_column_bet()
+
+    if bet_type is RouletteBetType.EIGHTEEN_NUMBER_BET:
+        return _random_eighteen_number_bet()
+
+    if bet_type is RouletteBetType.COLOR:
+        return _random_color_bet()
+
+    if bet_type is RouletteBetType.ODD:
+        return _odd_or_even_bet(is_even=False)
+
+    if bet_type is RouletteBetType.EVEN:
+        return _odd_or_even_bet(is_even=True)
+
+
+def _random_straight_up_bet() -> RouletteBet:
     row = Random().randint(1, 12)
     col = Random().randint(1, 3)
     random_pocket = _roulette.pocket_from_coord(row, col)
@@ -31,7 +68,7 @@ def random_straight_up_bet() -> RouletteBet:
     )
 
 
-def random_split_bet() -> RouletteBet:
+def _random_split_bet() -> RouletteBet:
     row = Random().randint(1, 12)
     col = Random().randint(1, 3)
     random_pocket = _roulette.pocket_from_coord(row, col)
@@ -50,7 +87,7 @@ def random_split_bet() -> RouletteBet:
     )
 
 
-def random_street_bet() -> RouletteBet:
+def _random_street_bet() -> RouletteBet:
     row = Random().randint(1, 12)
     return StreetBet(
         bet_amount=Random().uniform(1, 100),
@@ -58,7 +95,7 @@ def random_street_bet() -> RouletteBet:
     )
 
 
-def five_number_bet() -> RouletteBet:
+def _five_number_bet() -> RouletteBet:
     return FiveNumberBet(
         bet_amount=Random().uniform(1, 100),
         pockets=_roulette.pockets_from_color(PocketColor.GREEN)
@@ -66,7 +103,7 @@ def five_number_bet() -> RouletteBet:
     )
 
 
-def random_line_bet() -> RouletteBet:
+def _random_line_bet() -> RouletteBet:
     row = Random().randint(1, 11)
     return LineBet(
         bet_amount=Random().uniform(1, 100),
@@ -75,7 +112,7 @@ def random_line_bet() -> RouletteBet:
     )
 
 
-def random_dozen_bet() -> RouletteBet:
+def _random_dozen_bet() -> RouletteBet:
     starting_number = Random().choice([1, 13, 25])
     return DozenBet(
         bet_amount=Random().uniform(1, 100),
@@ -86,7 +123,7 @@ def random_dozen_bet() -> RouletteBet:
     )
 
 
-def random_column_bet() -> RouletteBet:
+def _random_column_bet() -> RouletteBet:
     col = Random().randint(1, 3)
     return ColumnBet(
         bet_amount=Random().uniform(1, 100),
@@ -94,7 +131,7 @@ def random_column_bet() -> RouletteBet:
     )
 
 
-def random_eighteen_number_bet() -> RouletteBet:
+def _random_eighteen_number_bet() -> RouletteBet:
     starting_number = Random().choice([1, 19])
     return EighteenNumberBet(
         bet_amount=Random().uniform(1, 100),
@@ -105,7 +142,7 @@ def random_eighteen_number_bet() -> RouletteBet:
     )
 
 
-def random_color_bet() -> RouletteBet:
+def _random_color_bet() -> RouletteBet:
     color = Random().choice(list(PocketColor))
 
     return ColorBet(
@@ -114,7 +151,7 @@ def random_color_bet() -> RouletteBet:
     )
 
 
-def odd_or_even_bet(is_even: bool) -> RouletteBet:
+def _odd_or_even_bet(is_even: bool) -> RouletteBet:
     start = 0 if is_even else 1
     pockets = [
         _roulette.pocket_from_pocket_number(pocket_number=pocket_number)
