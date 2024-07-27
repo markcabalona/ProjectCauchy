@@ -1,8 +1,19 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
+from random import Random
+import string
 from typing import List
 from .roulette_game import PocketColor, RoulettePocket
+
+
+def _generate_id() -> str:
+    return "RBID-" + "".join(
+        Random().choices(
+            string.ascii_uppercase + string.digits,
+            k=6,
+        )
+    )
 
 
 class RouletteBetType(Enum):
@@ -20,6 +31,7 @@ class RouletteBetType(Enum):
 
 
 class RouletteBet(ABC):
+    id: str = None
     type: RouletteBetType
     pockets: List[RoulettePocket]
     bet_amount: float
@@ -32,6 +44,7 @@ class RouletteBet(ABC):
 
 @dataclass
 class StraightUpBet(RouletteBet):
+    id: str = None
     type: RouletteBetType = RouletteBetType.STRAIGHT_UP
     bet_amount: float = None
     amount_won: float = None
@@ -42,6 +55,7 @@ class StraightUpBet(RouletteBet):
         bet_amount: float,
         pockets: List[RoulettePocket],
     ) -> None:
+        self.id = _generate_id()
         self.bet_amount = bet_amount
         self.pockets = pockets
 
@@ -51,6 +65,7 @@ class StraightUpBet(RouletteBet):
 
 @dataclass
 class SplitBet(RouletteBet):
+    id: str = None
     type: RouletteBetType = RouletteBetType.SPLIT
     bet_amount: float = None
     amount_won: float = None
@@ -61,6 +76,7 @@ class SplitBet(RouletteBet):
         bet_amount: float,
         pockets: List[RoulettePocket],
     ) -> None:
+        self.id = _generate_id()
         self.bet_amount = bet_amount
         self.pockets = pockets
 
@@ -70,6 +86,7 @@ class SplitBet(RouletteBet):
 
 @dataclass
 class StreetBet(RouletteBet):
+    id: str = None
     type: RouletteBetType = RouletteBetType.STREET
     bet_amount: float = None
     amount_won: float = None
@@ -80,6 +97,7 @@ class StreetBet(RouletteBet):
         bet_amount: float,
         pockets: List[RoulettePocket],
     ) -> None:
+        self.id = _generate_id()
         self.bet_amount = bet_amount
         self.pockets = pockets
 
@@ -89,6 +107,7 @@ class StreetBet(RouletteBet):
 
 @dataclass
 class FiveNumberBet(RouletteBet):
+    id: str = None
     type: RouletteBetType = RouletteBetType.FIVE_NUMBER_BET
     bet_amount: float = None
     amount_won: float = None
@@ -98,7 +117,7 @@ class FiveNumberBet(RouletteBet):
         bet_amount: float,
         pockets: List[RoulettePocket],
     ) -> None:
-
+        self.id = _generate_id()
         self.bet_amount = bet_amount
         self.pockets = pockets
 
@@ -108,6 +127,7 @@ class FiveNumberBet(RouletteBet):
 
 @dataclass
 class LineBet(RouletteBet):
+    id: str = None
     type: RouletteBetType = RouletteBetType.LINE
     bet_amount: float = None
     amount_won: float = None
@@ -118,7 +138,7 @@ class LineBet(RouletteBet):
         bet_amount: float,
         pockets: List[RoulettePocket],
     ) -> None:
-
+        self.id = _generate_id()
         self.bet_amount = bet_amount
         self.pockets = pockets
 
@@ -128,6 +148,7 @@ class LineBet(RouletteBet):
 
 @dataclass
 class DozenBet(RouletteBet):
+    id: str = None
     type: RouletteBetType = RouletteBetType.DOZEN
     bet_amount: float = None
     amount_won: float = None
@@ -138,7 +159,7 @@ class DozenBet(RouletteBet):
         bet_amount: float,
         pockets: List[RoulettePocket],
     ) -> None:
-
+        self.id = _generate_id()
         self.bet_amount = bet_amount
         self.pockets = pockets
         if pockets[0].pocket_number == 1:
@@ -154,6 +175,7 @@ class DozenBet(RouletteBet):
 
 @dataclass
 class ColumnBet(RouletteBet):
+    id: str = None
     type: RouletteBetType = RouletteBetType.COLUMN
     bet_amount: float = None
     amount_won: float = None
@@ -164,7 +186,7 @@ class ColumnBet(RouletteBet):
         bet_amount: float,
         pockets: List[RoulettePocket],
     ) -> None:
-
+        self.id = _generate_id()
         self.bet_amount = bet_amount
         self.pockets = pockets
         if pockets[0].pocket_number == 1:
@@ -180,7 +202,9 @@ class ColumnBet(RouletteBet):
 
 @dataclass
 class EighteenNumberBet(RouletteBet):
+    id: str = None
     type: RouletteBetType = RouletteBetType.EIGHTEEN_NUMBER_BET
+    bet_amount: float = None
     amount_won: float = None
     bet: str = None
 
@@ -189,7 +213,7 @@ class EighteenNumberBet(RouletteBet):
         bet_amount: float,
         pockets: List[RoulettePocket],
     ) -> None:
-
+        self.id = _generate_id()
         self.bet_amount = bet_amount
         self.pockets = pockets
         if pockets[0].pocket_number == 1:
@@ -203,7 +227,9 @@ class EighteenNumberBet(RouletteBet):
 
 @dataclass
 class ColorBet(RouletteBet):
+    id: str = None
     type: RouletteBetType = RouletteBetType.COLOR
+    bet_amount: float = None
     amount_won: float = None
     color: PocketColor = None
 
@@ -212,6 +238,7 @@ class ColorBet(RouletteBet):
         bet_amount: float,
         pockets: List[RoulettePocket],
     ) -> None:
+        self.id = _generate_id()
         self.bet_amount = bet_amount
         self.pockets = pockets
         self.color = pockets[0].pocket_color
@@ -222,7 +249,8 @@ class ColorBet(RouletteBet):
 
 @dataclass
 class OddOrEvenBet(RouletteBet):
-    type: RouletteBetType
+    id: str = None
+    type: RouletteBetType = None
     bet_amount: float = None
     amount_won: float = None
 
@@ -231,6 +259,7 @@ class OddOrEvenBet(RouletteBet):
         bet_amount: float,
         pockets: List[RoulettePocket],
     ) -> None:
+        self.id = _generate_id()
         self.bet_amount = bet_amount
         self.pockets = pockets
         self.type = (
