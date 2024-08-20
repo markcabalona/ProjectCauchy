@@ -1,8 +1,8 @@
+import json
 from random import Random
 import string
 from typing import Dict, List, Tuple
 import pandas as pd
-from .models import RouletteResponse, SinglePocketBet, OutsideBet
 
 
 def _generate_id() -> str:
@@ -25,7 +25,7 @@ __HIGH_OR_LOW_BET = "high_or_low_bet"
 __COLOR_BET = "color_bet"
 
 
-def transform(roulette_games: List[RouletteResponse]) -> List[Tuple[str, pd.DataFrame]]:
+def transform(roulette_games: json) -> List[Tuple[str, pd.DataFrame]]:
     game_df: List = []
     winning_pocket_df: List = []
     inside_bet_df: List = []
@@ -69,16 +69,16 @@ def _inside_bet_details(bet_id: str, pocket_number: int) -> Dict:
     }
 
 
-def _outside_bet_dict(bet: OutsideBet, bet_type: str) -> Dict:
+def _outside_bet_dict(bet: json, bet_type: str) -> Dict:
     return {
-        f"{bet_type}_bet_id": bet.id,
-        bet_type: bet.bet if bet.bet is not None else bet.type,
-        "bet_amount": bet.bet_amount,
-        "amount_won": bet.amount_won,
+        f"{bet_type}_bet_id": bet["id"],
+        bet_type: bet["bet"] if bet.__contains__("bet") else bet["type"],
+        "bet_amount": bet["bet_amount"],
+        "amount_won": bet["amount_won"],
     }
 
 
-def _transform_roulette_as_dict(roulette: RouletteResponse) -> Dict[str, List]:
+def _transform_roulette_as_dict(roulette: json) -> Dict[str, List]:
     game_df: List = []
     winning_pocket_df: List = []
     inside_bet_df: List = []
@@ -104,44 +104,46 @@ def _transform_roulette_as_dict(roulette: RouletteResponse) -> Dict[str, List]:
     winning_pocket_df.append(
         {
             "winning_pocket_id": winning_pocket_id,
-            **roulette.winning_pocket.to_dict(),
+            **roulette["winning_pocket"],
         }
     )
 
     # populate inside bet and inside bet details dfs
     inside_bets = (
-        roulette.bets.straight_up
-        + roulette.bets.split
-        + roulette.bets.line
-        + roulette.bets.five_number_bet
-        + roulette.bets.street
+        roulette["bets"]["STRAIGHT_UP"]
+        + roulette["bets"]["SPLIT"]
+        + roulette["bets"]["LINE"]
+        + roulette["bets"]["FIVE_NUMBER_BET"]
+        + roulette["bets"]["STREET"]
     )
     for bet in inside_bets:
 
         inside_bet_df.append(
             {
                 "game_id": game_id,
-                **bet.as_dict(),
+                **bet,
             }
         )
 
-        if isinstance(bet, SinglePocketBet):
+        if bet["type"] == "FIVE_NUMBER_BET":
+            continue
+        elif bet["type"] == "STRAIGHT_UP":
             inside_bet_details_df.append(
                 _inside_bet_details(
-                    bet_id=bet.id,
-                    pocket_number=bet.pocket.pocket_number,
+                    bet_id=bet["id"],
+                    pocket_number=bet["pocket"]["pocket_number"],
                 )
             )
         else:
-            for pocket in bet.pockets:
+            for pocket in bet["pockets"]:
                 inside_bet_details_df.append(
                     _inside_bet_details(
-                        bet_id=bet.id,
-                        pocket_number=pocket.pocket_number,
+                        bet_id=bet["id"],
+                        pocket_number=pocket["pocket_number"],
                     )
                 )
 
-    for dozen_bet in roulette.bets.dozen:
+    for dozen_bet in roulette["bets"]["DOZEN"]:
         dozen_bet_df.append(
             {
                 "game_id": game_id,
@@ -149,7 +151,7 @@ def _transform_roulette_as_dict(roulette: RouletteResponse) -> Dict[str, List]:
             }
         )
 
-    for column_bet in roulette.bets.column:
+    for column_bet in roulette["bets"]["COLUMN"]:
         column_bet_df.append(
             {
                 "game_id": game_id,
@@ -157,14 +159,14 @@ def _transform_roulette_as_dict(roulette: RouletteResponse) -> Dict[str, List]:
             }
         )
 
-    for odd_or_even_bet in roulette.bets.odd + roulette.bets.even:
+    for odd_or_even_bet in roulette["bets"]["ODD"] + roulette["bets"]["EVEN"]:
         odd_or_even_bet_df.append(
             {
                 "game_id": game_id,
                 **_outside_bet_dict(odd_or_even_bet, bet_type="odd_or_even"),
             }
         )
-    for high_or_low_bet in roulette.bets.eighteen_number_bet:
+    for high_or_low_bet in roulette["bets"]["EIGHTEEN_NUMBER_BET"]:
         high_or_low_bet_df.append(
             {
                 "game_id": game_id,
@@ -172,7 +174,7 @@ def _transform_roulette_as_dict(roulette: RouletteResponse) -> Dict[str, List]:
             }
         )
 
-    for color_bet in roulette.bets.color:
+    for color_bet in roulette["bets"]["COLOR"]:
         color_bet_df.append(
             {
                 "game_id": game_id,
