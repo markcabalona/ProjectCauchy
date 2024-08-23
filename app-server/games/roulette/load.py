@@ -4,5 +4,5 @@ import pandas as pd
 
 def load(data_frames: List[Tuple[str, pd.DataFrame]]):
     for file_name, data_frame in data_frames:
-        data_frame.to_csv(f"games/roulette/data/{file_name}.csv")
+        data_frame.to_csv(f"data/roulette_{file_name}.csv")
 
